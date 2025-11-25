@@ -1,0 +1,24 @@
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
+Vagrant.configure("2") do |config|
+  nodes = {
+    "master1" => { :ip => "192.168.57.11", :cpus => 2, :memory => 2048 },
+    "master2" => { :ip => "192.168.57.12", :cpus => 2, :memory => 2048 },
+    "master3" => { :ip => "192.168.57.13", :cpus => 2, :memory => 2048 },
+    "worker1" => { :ip => "192.168.57.21", :cpus => 2, :memory => 2048 },
+    "worker2" => { :ip => "192.168.57.22", :cpus => 2, :memory => 2048 },
+  }
+
+  config.vm.box = "bento/ubuntu-22.04"
+
+  nodes.each do |name, opts|
+    config.vm.define name do |node|
+      node.vm.hostname = name
+      node.vm.network "private_network", ip: opts[:ip]
+      node.vm.provider "virtualbox" do |vb|
+        vb.cpus = opts[:cpus]
+        vb.memory = opts[:memory]
+      end
+      node.vm.provision "shell", inline: "sudo apt update -y"
+    end
+  end
+end
